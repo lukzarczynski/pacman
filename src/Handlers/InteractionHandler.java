@@ -2,8 +2,10 @@ package Handlers;
 
 import Game.GameState;
 import Objects.Direction;
+import Objects.Ghost;
 import Objects.MovingGameObject;
 import Objects.Player;
+import Objects.PointType;
 import java.awt.Graphics2D;
 
 /**
@@ -18,6 +20,9 @@ public class InteractionHandler extends AbstractHandler {
 
     @Override
     void handleData(Graphics2D data, GameState state) {
+        if (state.isExtraModeFinished()) {
+            state.setExtraMode(false);
+        }
 
         Player player = state.getPlayer();
         if (player.getColumn() * SQUARE_SIZE + HALF_SQUARE == (int) player.getX()
@@ -60,6 +65,35 @@ public class InteractionHandler extends AbstractHandler {
         if (player instanceof Player && player.getField().getPoint() != null && !player.getField().getPoint().isEaten()) {
             player.getField().getPoint().setEaten(true);
             state.setScore(state.getScore() + player.getField().getPoint().getType().getValue());
+            if (PointType.BIG.equals(player.getField().getPoint().getType())) {
+                state.setExtraMode(true);
+            }
+        }
+        if (player instanceof Player) {
+            if (state.isExtraMode()) {
+                state.getGhosts().stream()
+                        .filter(g -> !g.isEaten())
+                        .filter(g -> g.getField().equals(player.getField()))
+                        .forEach(g -> {
+                            g.setEaten(true);
+                            state.eatGhost();
+                            state.setScore(state.getScore() + state.getGhostsEaten());
+                        });
+            } else {
+                if (state.getGhosts().stream()
+                        .filter(g -> !g.isEaten())
+                        .anyMatch(g -> g.getField().equals(player.getField()))) {
+                    state.setPlayerDead(true);
+                    state.reset(SQUARE_SIZE, false);
+                }
+            }
+        }
+        if(player instanceof Ghost){
+            if(player.isEaten()){
+                if(player.getField().equals(state.getGhostBaseField())){
+                    player.setEaten(false);
+                }
+            }
         }
 
     }

@@ -2,6 +2,7 @@ package Handlers;
 
 import Game.GameState;
 import Objects.Ghost;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,7 +36,13 @@ public class GhostHandler extends AbstractHandler {
             mainTimer.scheduleAtFixedRate(ghostLegs, 0, 500);
         }
         state.getGhosts().forEach((ghost) -> {
-            data.setColor(ghost.getColor());
+            if(ghost.isEaten()){
+                data.setColor(Color.WHITE);
+            }else if (state.isExtraMode()) {
+                data.setColor(Color.BLUE);
+            } else {
+                data.setColor(ghost.getColor());
+            }
             data.drawRect(ghost.getField().getColumn() * SQUARE_SIZE, ghost.getField().getRow() * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
 
             if (ghost.getX() == 0) {
@@ -44,19 +51,19 @@ public class GhostHandler extends AbstractHandler {
 
             switch (ghost.getDirection()) {
                 case DOWN:
-                    ghost.move(0, 1);
+                    ghost.move(0, 1, state.isExtraMode());
                     if (ghost.getField().getFieldDown() != null && ghost.getY() > (ghost.getField().getFieldDown().getRow() * SQUARE_SIZE)) {
                         ghost.setField(ghost.getField().getFieldDown());
                     }
                     break;
                 case UP:
-                    ghost.move(0, -1);
+                    ghost.move(0, -1, state.isExtraMode());
                     if (ghost.getField().getFieldUp() != null && ghost.getY() < ((ghost.getField().getFieldUp().getRow() + 1) * SQUARE_SIZE)) {
                         ghost.setField(ghost.getField().getFieldUp());
                     }
                     break;
                 case LEFT:
-                    ghost.move(-1, 0);
+                    ghost.move(-1, 0, state.isExtraMode());
                     if (ghost.getField().getFieldLeft() != null
                             && !(ghost.getField().isTeleport() && ghost.getField().getFieldLeft().isTeleport())
                             && ghost.getX() < ((ghost.getField().getFieldLeft().getColumn() + 1) * SQUARE_SIZE)) {
@@ -64,7 +71,7 @@ public class GhostHandler extends AbstractHandler {
                     }
                     break;
                 case RIGHT:
-                    ghost.move(1, 0);
+                    ghost.move(1, 0, state.isExtraMode());
                     if (ghost.getField().getFieldRight() != null
                             && !(ghost.getField().isTeleport() && ghost.getField().getFieldRight().isTeleport())
                             && ghost.getX() > (ghost.getField().getFieldRight().getColumn() * SQUARE_SIZE)) {

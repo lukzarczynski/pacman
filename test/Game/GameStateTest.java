@@ -1,6 +1,9 @@
 package Game;
 
+import Objects.Direction;
 import Objects.WallType;
+import Utils.Dijsktra;
+import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -43,6 +46,11 @@ public class GameStateTest {
         for (WallType type : WallType.values()) {
             assertTrue(state.getWalls().stream().anyMatch(o -> o.getType().equals(type)));
         }
+    }
+    
+    @Test
+    public void testDijkstra(){
+        List<Direction> result = Dijsktra.getDirections(state.getGhostBaseField(), state.getPlayer().getField());
     }
 
 }

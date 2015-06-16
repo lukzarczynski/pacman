@@ -10,12 +10,16 @@ public class MovingGameObject extends GameObject {
     private Direction nextDirection;
     private double speed = 1.5;
     private Field field;
+    private final Field baseField;
+
+    private boolean eaten = false;
 
     public MovingGameObject(int column, int row, Field field) {
         super(column, row);
-        direction = Direction.LEFT;
+        direction = Direction.NONE;
         nextDirection = Direction.LEFT;
         this.field = field;
+        this.baseField = field;
     }
 
     public Direction getDirection() {
@@ -45,6 +49,15 @@ public class MovingGameObject extends GameObject {
     public void move(int h, int v) {
         setY(getY() + (v * getSpeed()));
         setX(getX() + (h * getSpeed()));
+    }
+
+    public void move(int h, int v, boolean isExtraMode) {
+        if (isExtraMode) {
+            setY(getY() + (v * (getSpeed() / 2)));
+            setX(getX() + (h * (getSpeed() / 2)));
+        } else {
+            move(h, v);
+        }
     }
 
     public boolean isDirectionValid(Direction dir) {
@@ -81,6 +94,20 @@ public class MovingGameObject extends GameObject {
         this.field = field;
         setColumn(field.getColumn());
         setRow(field.getRow());
+    }
+
+    public void resetToBase() {
+        setDirection(Direction.NONE);
+        setField(baseField);
+        setX(0);
+    }
+
+    public boolean isEaten() {
+        return eaten;
+    }
+
+    public void setEaten(boolean eaten) {
+        this.eaten = eaten;
     }
 
 }

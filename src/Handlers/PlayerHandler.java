@@ -26,7 +26,7 @@ public class PlayerHandler extends AbstractHandler {
             player.setY(SQUARE_SIZE * player.getRow() + HALF_SQUARE);
         }
         state.getFields().stream()
-                .filter(f->f.isCross())
+                .filter(f -> f.isCross())
                 .forEach((f) -> {
                     data.setColor(Color.red);
                     data.drawRect(f.getColumn() * SQUARE_SIZE,
@@ -35,54 +35,56 @@ public class PlayerHandler extends AbstractHandler {
                 }
                 );
 
-        switch (player.getDirection()) {
-            case DOWN:
-                player.move(0, 1);
-                player.nextState();
-                if (player.getField().getFieldDown() != null && player.getY() > (player.getField().getFieldDown().getRow() * SQUARE_SIZE)) {
-                    player.setField(player.getField().getFieldDown());
-                }
-                startangle = 270;
-                break;
-            case UP:
-                player.move(0, -1);
-                player.nextState();
-                if (player.getField().getFieldUp() != null && player.getY() < ((player.getField().getFieldUp().getRow() + 1) * SQUARE_SIZE)) {
-                    player.setField(player.getField().getFieldUp());
-                }
-                startangle = 90;
-                break;
-            case LEFT:
-                player.move(-1, 0);
-                player.nextState();
-                if (player.getField().getFieldLeft() != null
-                        && !(player.getField().isTeleport() && player.getField().getFieldLeft().isTeleport())
-                        && player.getX() < ((player.getField().getFieldLeft().getColumn() + 1) * SQUARE_SIZE)) {
-                    player.setField(player.getField().getFieldLeft());
-                }
-                startangle = 180;
-                break;
-            case RIGHT:
-                player.move(1, 0);
-                player.nextState();
-                if (player.getField().getFieldRight() != null
-                        && !(player.getField().isTeleport() && player.getField().getFieldRight().isTeleport())
-                        && player.getX() > (player.getField().getFieldRight().getColumn() * SQUARE_SIZE)) {
-                    player.setField(player.getField().getFieldRight());
-                }
-                startangle = 0;
-                break;
-        }
+        if (!player.isEaten()) {
+            switch (player.getDirection()) {
+                case DOWN:
+                    player.move(0, 1);
+                    player.nextState();
+                    if (player.getField().getFieldDown() != null && player.getY() > (player.getField().getFieldDown().getRow() * SQUARE_SIZE)) {
+                        player.setField(player.getField().getFieldDown());
+                    }
+                    startangle = 270;
+                    break;
+                case UP:
+                    player.move(0, -1);
+                    player.nextState();
+                    if (player.getField().getFieldUp() != null && player.getY() < ((player.getField().getFieldUp().getRow() + 1) * SQUARE_SIZE)) {
+                        player.setField(player.getField().getFieldUp());
+                    }
+                    startangle = 90;
+                    break;
+                case LEFT:
+                    player.move(-1, 0);
+                    player.nextState();
+                    if (player.getField().getFieldLeft() != null
+                            && !(player.getField().isTeleport() && player.getField().getFieldLeft().isTeleport())
+                            && player.getX() < ((player.getField().getFieldLeft().getColumn() + 1) * SQUARE_SIZE)) {
+                        player.setField(player.getField().getFieldLeft());
+                    }
+                    startangle = 180;
+                    break;
+                case RIGHT:
+                    player.move(1, 0);
+                    player.nextState();
+                    if (player.getField().getFieldRight() != null
+                            && !(player.getField().isTeleport() && player.getField().getFieldRight().isTeleport())
+                            && player.getX() > (player.getField().getFieldRight().getColumn() * SQUARE_SIZE)) {
+                        player.setField(player.getField().getFieldRight());
+                    }
+                    startangle = 0;
+                    break;
+            }
 
-        data.drawRect(player.getField().getColumn() * SQUARE_SIZE,
-                player.getField().getRow() * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
-        data.fillArc(
-                (int) player.getX() - HALF_SQUARE,
-                (int) player.getY() - HALF_SQUARE,
-                SQUARE_SIZE,
-                SQUARE_SIZE,
-                startangle + (player.getState() * 9),
-                360 - (player.getState() * 18));
+            data.drawRect(player.getField().getColumn() * SQUARE_SIZE,
+                    player.getField().getRow() * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+            data.fillArc(
+                    (int) player.getX() - HALF_SQUARE,
+                    (int) player.getY() - HALF_SQUARE,
+                    SQUARE_SIZE,
+                    SQUARE_SIZE,
+                    startangle + (player.getState() * 9),
+                    360 - (player.getState() * 18));
+        }
     }
 
 }

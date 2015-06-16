@@ -1,5 +1,8 @@
 package Objects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author lukasz
@@ -13,6 +16,7 @@ public class Field extends GameObject {
     private Point point;
     private boolean teleport;
     private boolean cross = false;
+    private boolean ghostBase;
 
     public Field(int posX, int posY) {
         super(posX, posY);
@@ -28,6 +32,11 @@ public class Field extends GameObject {
     public Field(int posX, int posY, boolean teleport) {
         super(posX, posY);
         this.teleport = teleport;
+    }
+
+    public Field(boolean ghostBase, int posX, int posY) {
+        super(posX, posY);
+        this.ghostBase = ghostBase;
     }
 
     public Field(int posX, int posY, Point point, boolean teleport) {
@@ -86,6 +95,48 @@ public class Field extends GameObject {
 
     public void setCross(boolean cross) {
         this.cross = cross;
+    }
+
+    public boolean isGhostBase() {
+        return ghostBase;
+    }
+
+    public void setGhostBase(boolean ghostBase) {
+        this.ghostBase = ghostBase;
+    }
+
+    public List<Field> getFields() {
+        List<Field> result = new ArrayList<>();
+        if (getFieldDown() != null) {
+            result.add(getFieldDown());
+        }
+        if (getFieldUp() != null) {
+            result.add(getFieldUp());
+        }
+        if (getFieldLeft() != null) {
+            result.add(getFieldLeft());
+        }
+        if (getFieldRight() != null) {
+            result.add(getFieldRight());
+        }
+        return result;
+    }
+
+    public Direction getDirectionToField(Field field) {
+        if (field.equals(getFieldDown())) {
+            return Direction.DOWN;
+        }
+        if (field.equals(getFieldUp())) {
+            return Direction.UP;
+        }
+        if (field.equals(getFieldLeft())) {
+            return Direction.LEFT;
+        }
+        if (field.equals(getFieldRight())) {
+            return Direction.RIGHT;
+        } else {
+            return Direction.NONE;
+        }
     }
 
 }

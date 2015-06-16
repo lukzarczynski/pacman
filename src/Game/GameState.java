@@ -10,6 +10,7 @@ import Objects.PointType;
 import Objects.Wall;
 import Objects.WallType;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,6 +26,13 @@ public class GameState {
     private final List<Field> fields = new ArrayList<>();
     private int level = 1;
     private int score = 0;
+    private boolean extraMode = false;
+    private Long extraModeStart;
+    private final Long extraModeDuration = 5000L;
+    private Field ghostBaseField;
+    private int ghostsEaten = 0;
+    private boolean playerDead = false;
+    private int lives = 3;
 
     public GameState() {
     }
@@ -78,6 +86,10 @@ public class GameState {
                 }
                 if (map[row][column].equals("G")) {
                     fields.add(new Field(column, row, false));
+                }
+                if (map[row][column].equals("b")) {
+                    ghostBaseField = new Field(true, column, row);
+                    fields.add(ghostBaseField);
                 }
             }
         }
@@ -155,6 +167,63 @@ public class GameState {
             return fields.stream().filter(f -> f.getColumn() == MapStatic.map[0].length - 1 && f.getRow() == y).findFirst().orElse(null);
         }
         return fields.stream().filter(f -> f.getColumn() == x && f.getRow() == y).findFirst().orElse(null);
+    }
+
+    public boolean isExtraMode() {
+        return extraMode;
+    }
+
+    public void setExtraMode(boolean extraMode) {
+        if (extraMode) {
+            this.extraModeStart = new Date().getTime();
+        } else {
+            this.extraModeStart = null;
+        }
+        ghostsEaten = 0;
+        this.extraMode = extraMode;
+    }
+
+    public boolean isExtraModeFinished() {
+        if (extraModeStart == null) {
+            return false;
+        }
+        return new Date().getTime() > (extraModeStart + extraModeDuration);
+    }
+
+    public Field getGhostBaseField() {
+        return ghostBaseField;
+    }
+
+    public int getGhostsEaten() {
+        return ghostsEaten;
+    }
+
+    public void eatGhost() {
+        if (ghostsEaten == 0) {
+            ghostsEaten = 200;
+        } else {
+            ghostsEaten *= 2;
+        }
+    }
+
+    public boolean isPlayerDead() {
+        return playerDead;
+    }
+
+    public void setPlayerDead(boolean playerDead) {
+        this.player.setEaten(playerDead);
+        this.playerDead = playerDead;
+        this.lives--;
+    }
+    
+    public void reset(int SQUARE_SIZE, boolean resetPoints){
+        this.player.resetToBase();
+        ghosts.stream().forEach(g -> g.resetToBase());
+        if(resetPoints){
+            points.stream().forEach(p -> p.setEaten(false));
+        }
+        setPlayerDead(false);
+        setExtraMode(false);
     }
 
 }
