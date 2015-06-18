@@ -4,7 +4,8 @@ package Objects;
  *
  * @author lukasz
  */
-public class Player extends MovingGameObject {
+public class Player
+        extends MovingGameObject {
 
     private int state = 0;
     private int statedir = 1;

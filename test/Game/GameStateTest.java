@@ -20,7 +20,7 @@ public class GameStateTest {
 
     @Before
     public void setUp() {
-        state = new GameState();
+        state = new GameState(5, 5, 5);
         state.initGameState();
     }
 
@@ -47,9 +47,9 @@ public class GameStateTest {
             assertTrue(state.getWalls().stream().anyMatch(o -> o.getType().equals(type)));
         }
     }
-    
+
     @Test
-    public void testDijkstra(){
+    public void testDijkstra() {
         List<Direction> result = Dijsktra.getDirections(state.getGhostBaseField(), state.getPlayer().getField());
     }
 

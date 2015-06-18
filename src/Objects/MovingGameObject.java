@@ -1,14 +1,17 @@
 package Objects;
 
+import Utils.Calculator;
+
 /**
  *
  * @author lukasz
  */
-public class MovingGameObject extends GameObject {
+public class MovingGameObject
+        extends GameObject {
 
     private Direction direction;
     private Direction nextDirection;
-    private double speed = 1.5;
+    private double speed = 3;
     private Field field;
     private final Field baseField;
 
@@ -61,6 +64,9 @@ public class MovingGameObject extends GameObject {
     }
 
     public boolean isDirectionValid(Direction dir) {
+        if (dir == null) {
+            return false;
+        }
         switch (dir) {
             case DOWN:
                 if (getField().getFieldDown() != null) {
@@ -94,6 +100,16 @@ public class MovingGameObject extends GameObject {
         this.field = field;
         setColumn(field.getColumn());
         setRow(field.getRow());
+    }
+
+    public void setFieldIfNear(Field nextField, double distance) {
+        if (nextField != null
+                && !(nextField.isTeleport()
+                && this.getField().isTeleport())
+                && Calculator.distance(this, nextField) <= distance) {
+            setField(nextField);
+        }
+
     }
 
     public void resetToBase() {

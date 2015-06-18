@@ -6,33 +6,38 @@ import Objects.Ghost;
 import Objects.MovingGameObject;
 import Objects.Player;
 import Objects.PointType;
+import Utils.Calculator;
 import java.awt.Graphics2D;
+import java.util.logging.Logger;
 
 /**
  *
  * @author lukasz
  */
-public class InteractionHandler extends AbstractHandler {
+public class InteractionHandler
+        extends AbstractHandler {
 
-    public InteractionHandler(int SQUARE_SIZE, int WINDOW_WIDTH, int WINDOW_HEIGHT) {
-        super(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
+    private static final Logger LOG = Logger.getLogger(InteractionHandler.class.getName());
+
+    @Override
+    void drawData(Graphics2D data, GameState state) {
     }
 
     @Override
-    void handleData(Graphics2D data, GameState state) {
+    void behaveData(GameState state) {
         if (state.isExtraModeFinished()) {
             state.setExtraMode(false);
         }
 
         Player player = state.getPlayer();
-        if (player.getColumn() * SQUARE_SIZE + HALF_SQUARE == (int) player.getX()
-                && player.getRow() * SQUARE_SIZE + HALF_SQUARE == (int) player.getY()) {
+        if (player.getColumn() * state.getSQUARE_SIZE() + state.getHALF_SQUARE() == (int) player.getX()
+                && player.getRow() * state.getSQUARE_SIZE() + state.getHALF_SQUARE() == (int) player.getY()) {
             tryToChangeDirection(player);
             interactWithField(player, state);
         }
         state.getGhosts().stream().forEach((g) -> {
-            if (g.getColumn() * SQUARE_SIZE + HALF_SQUARE == (int) g.getX()
-                    && g.getRow() * SQUARE_SIZE + HALF_SQUARE == (int) g.getY()) {
+            if (g.getColumn() * state.getSQUARE_SIZE() + state.getHALF_SQUARE() == (int) g.getX()
+                    && g.getRow() * state.getSQUARE_SIZE() + state.getHALF_SQUARE() == (int) g.getY()) {
                 tryToChangeDirection(g);
                 interactWithField(g, state);
             }
@@ -59,8 +64,8 @@ public class InteractionHandler extends AbstractHandler {
             }
             player.setColumn(player.getField().getColumn());
             player.setRow(player.getField().getRow());
-            player.setX(SQUARE_SIZE * player.getColumn() + HALF_SQUARE);
-            player.setY(SQUARE_SIZE * player.getRow() + HALF_SQUARE);
+            player.setX(state.getSQUARE_SIZE() * player.getColumn() + state.getHALF_SQUARE());
+            player.setY(state.getSQUARE_SIZE() * player.getRow() + state.getHALF_SQUARE());
         }
         if (player instanceof Player && player.getField().getPoint() != null && !player.getField().getPoint().isEaten()) {
             player.getField().getPoint().setEaten(true);
@@ -73,7 +78,7 @@ public class InteractionHandler extends AbstractHandler {
             if (state.isExtraMode()) {
                 state.getGhosts().stream()
                         .filter(g -> !g.isEaten())
-                        .filter(g -> g.getField().equals(player.getField()))
+                        .filter(g -> Calculator.distance((Player) player, g) < state.SQUARE_SIZE)
                         .forEach(g -> {
                             g.setEaten(true);
                             state.eatGhost();
@@ -82,15 +87,15 @@ public class InteractionHandler extends AbstractHandler {
             } else {
                 if (state.getGhosts().stream()
                         .filter(g -> !g.isEaten())
-                        .anyMatch(g -> g.getField().equals(player.getField()))) {
+                        .anyMatch(g -> Calculator.distance((Player) player, g) < state.SQUARE_SIZE)) {
                     state.setPlayerDead(true);
-                    state.reset(SQUARE_SIZE, false);
+                    state.reset(state.getSQUARE_SIZE(), false);
                 }
             }
         }
-        if(player instanceof Ghost){
-            if(player.isEaten()){
-                if(player.getField().equals(state.getGhostBaseField())){
+        if (player instanceof Ghost) {
+            if (player.isEaten()) {
+                if (player.getField().equals(state.getGhostBaseField())) {
                     player.setEaten(false);
                 }
             }

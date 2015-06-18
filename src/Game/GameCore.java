@@ -20,16 +20,18 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import static java.lang.System.exit;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Level;
+import java.util.Date;
 import java.util.logging.Logger;
 
 /**
  *
  * @author lukasz
  */
-public class GameCore extends Canvas implements KeyListener {
+public class GameCore
+        extends Canvas
+        implements KeyListener {
+
+    private static final Logger LOG = Logger.getLogger(GameCore.class.getName());
 
     private boolean runMainThread;
     private Frame frame;
@@ -39,7 +41,8 @@ public class GameCore extends Canvas implements KeyListener {
     private BufferStrategy bufferStrategy;
     private AbstractHandler handler;
     private GameState state;
-    private TimerTask mainLoop;
+    private final double fps = 30;
+    private final long frameDelay = (long) (1000 / fps);
 
     public GameCore(int width, int height) {
         this.WINDOW_WIDTH = width;
@@ -69,41 +72,38 @@ public class GameCore extends Canvas implements KeyListener {
         createBufferStrategy(2);
         bufferStrategy = getBufferStrategy();
         runMainThread = true;
-        this.handler = new MapHandler(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
-        this.handler.attachHandler(new PointHandler(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT));
-        this.handler.attachHandler(new InteractionHandler(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT));
-        this.handler.attachHandler(new PlayerHandler(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT));
-        this.handler.attachHandler(new GhostHandler(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT));
-        this.handler.attachHandler(new ScoreHandler(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT));
-        this.handler.attachHandler(new GhostAIHandler(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT));
-        this.state = new GameState();
+        this.state = new GameState(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
         state.initGameState();
-        this.mainLoop = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    mainThreadLoop();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(GameCore.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        };
-        Timer mainTimer = new Timer();
-        mainTimer.scheduleAtFixedRate(mainLoop, 10, 1000 / 60);
+        this.handler = new MapHandler(state);
+        this.handler.attachHandler(new PointHandler(state));
+        this.handler.attachHandler(new InteractionHandler());
+        this.handler.attachHandler(new PlayerHandler());
+        this.handler.attachHandler(new GhostHandler(state));
+        this.handler.attachHandler(new ScoreHandler());
+        this.handler.attachHandler(new GhostAIHandler());
 
     }
 
     public void mainThreadLoop() throws InterruptedException {
-        if (runMainThread) {
+        while (runMainThread) {
+            Long start = new Date().getTime();
             Graphics2D g = getGraphicsContext();
 
             g.setColor(Color.black);
             g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
             g.translate(10, 30);
 
-            handler.handle(g, state);
+            handler.behave(state);
+            handler.draw(g, state);
             g.dispose();
             bufferStrategy.show();
+            Long time = new Date().getTime() - start;
+            state.setFps(time);
+//            LOG.log(Level.INFO, "+ {0} ms", time);
+            if (frameDelay > time) {
+                Thread.sleep(frameDelay - time);
+            }
+//            LOG.log(Level.INFO, "- {0} ms", (new Date().getTime() - start));
 
         }
     }

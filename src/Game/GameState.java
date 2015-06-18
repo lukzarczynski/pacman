@@ -18,12 +18,17 @@ import java.util.List;
  * @author lukasz
  */
 public class GameState {
-
+    
+    public final int SQUARE_SIZE;
+    public final int HALF_SQUARE;
+    public final int WINDOW_WIDTH;
+    public final int WINDOW_HEIGHT;
+    
     private final List<Wall> walls = new ArrayList<>();
-    private Player player;
     private final List<Ghost> ghosts = new ArrayList<>();
     private final List<Point> points = new ArrayList<>();
     private final List<Field> fields = new ArrayList<>();
+    private Player player;
     private int level = 1;
     private int score = 0;
     private boolean extraMode = false;
@@ -33,11 +38,21 @@ public class GameState {
     private int ghostsEaten = 0;
     private boolean playerDead = false;
     private int lives = 3;
-
-    public GameState() {
+    
+    private long fps = 0;
+    
+    public GameState(int SQUARE_SIZE, int WINDOW_WIDTH, int WINDOW_HEIGHT) {
+        this.SQUARE_SIZE = SQUARE_SIZE;
+        this.HALF_SQUARE = SQUARE_SIZE / 2;
+        this.WINDOW_WIDTH = WINDOW_WIDTH;
+        this.WINDOW_HEIGHT = WINDOW_HEIGHT;
     }
-
+    
     public GameState(GameState state) {
+        this.HALF_SQUARE = state.getHALF_SQUARE();
+        this.SQUARE_SIZE = state.getSQUARE_SIZE();
+        this.WINDOW_HEIGHT = state.getWINDOW_HEIGHT();
+        this.WINDOW_WIDTH = state.getWINDOW_WIDTH();
         this.walls.addAll(state.getWalls());
         this.ghosts.addAll(state.getGhosts());
         this.points.addAll(state.getPoints());
@@ -46,7 +61,7 @@ public class GameState {
         this.score = state.getScore();
         this.player = state.getPlayer();
     }
-
+    
     public void initGameState() {
         walls.clear();
         ghosts.clear();
@@ -95,39 +110,7 @@ public class GameState {
         }
         initFields();
     }
-
-    public List<Wall> getWalls() {
-        return walls;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public List<Ghost> getGhosts() {
-        return ghosts;
-    }
-
-    public List<Point> getPoints() {
-        return points;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
+    
     private void initFields() {
         for (int row = 0; row < MapStatic.map.length; row++) {
             for (int column = 0; column < MapStatic.map[0].length; column++) {
@@ -148,6 +131,7 @@ public class GameState {
                 }
             }
         }
+        getFields().stream().forEach(f -> f.setFieldCoords(getHALF_SQUARE(), getSQUARE_SIZE()));
         getFields().stream()
                 .filter((f) -> ((f.getFieldUp() != null || f.getFieldDown() != null)
                         && (f.getFieldLeft() != null || f.getFieldRight() != null)))
@@ -155,11 +139,7 @@ public class GameState {
                     f.setCross(true);
                 });
     }
-
-    public List<Field> getFields() {
-        return fields;
-    }
-
+    
     private Field findFieldAtPosition(int x, int y) {
         if (x == MapStatic.map[0].length) {
             return fields.stream().filter(f -> f.getColumn() == 0 && f.getRow() == y).findFirst().orElse(null);
@@ -168,11 +148,47 @@ public class GameState {
         }
         return fields.stream().filter(f -> f.getColumn() == x && f.getRow() == y).findFirst().orElse(null);
     }
-
+    
+    public List<Wall> getWalls() {
+        return walls;
+    }
+    
+    public Player getPlayer() {
+        return player;
+    }
+    
+    public List<Ghost> getGhosts() {
+        return ghosts;
+    }
+    
+    public List<Point> getPoints() {
+        return points;
+    }
+    
+    public int getLevel() {
+        return level;
+    }
+    
+    public int getScore() {
+        return score;
+    }
+    
+    public void setLevel(int level) {
+        this.level = level;
+    }
+    
+    public void setScore(int score) {
+        this.score = score;
+    }
+    
+    public List<Field> getFields() {
+        return fields;
+    }
+    
     public boolean isExtraMode() {
         return extraMode;
     }
-
+    
     public void setExtraMode(boolean extraMode) {
         if (extraMode) {
             this.extraModeStart = new Date().getTime();
@@ -182,22 +198,22 @@ public class GameState {
         ghostsEaten = 0;
         this.extraMode = extraMode;
     }
-
+    
     public boolean isExtraModeFinished() {
         if (extraModeStart == null) {
             return false;
         }
         return new Date().getTime() > (extraModeStart + extraModeDuration);
     }
-
+    
     public Field getGhostBaseField() {
         return ghostBaseField;
     }
-
+    
     public int getGhostsEaten() {
         return ghostsEaten;
     }
-
+    
     public void eatGhost() {
         if (ghostsEaten == 0) {
             ghostsEaten = 200;
@@ -205,25 +221,49 @@ public class GameState {
             ghostsEaten *= 2;
         }
     }
-
+    
     public boolean isPlayerDead() {
         return playerDead;
     }
-
+    
     public void setPlayerDead(boolean playerDead) {
         this.player.setEaten(playerDead);
         this.playerDead = playerDead;
         this.lives--;
     }
     
-    public void reset(int SQUARE_SIZE, boolean resetPoints){
+    public void reset(int SQUARE_SIZE, boolean resetPoints) {
         this.player.resetToBase();
         ghosts.stream().forEach(g -> g.resetToBase());
-        if(resetPoints){
+        if (resetPoints) {
             points.stream().forEach(p -> p.setEaten(false));
         }
         setPlayerDead(false);
         setExtraMode(false);
     }
-
+    
+    public int getSQUARE_SIZE() {
+        return SQUARE_SIZE;
+    }
+    
+    public int getHALF_SQUARE() {
+        return HALF_SQUARE;
+    }
+    
+    public int getWINDOW_WIDTH() {
+        return WINDOW_WIDTH;
+    }
+    
+    public int getWINDOW_HEIGHT() {
+        return WINDOW_HEIGHT;
+    }
+    
+    public long getFps() {
+        return fps;
+    }
+    
+    public void setFps(long fps) {
+        this.fps = fps;
+    }
+    
 }

@@ -7,7 +7,8 @@ import java.util.List;
  *
  * @author lukasz
  */
-public class Field extends GameObject {
+public class Field
+        extends GameObject {
 
     private Field fieldUp;
     private Field fieldDown;
@@ -103,6 +104,11 @@ public class Field extends GameObject {
 
     public void setGhostBase(boolean ghostBase) {
         this.ghostBase = ghostBase;
+    }
+
+    public void setFieldCoords(int halfSquareSize, int squareSize) {
+        setX((getColumn() * squareSize) + halfSquareSize);
+        setY((getRow() * squareSize) + halfSquareSize);
     }
 
     public List<Field> getFields() {

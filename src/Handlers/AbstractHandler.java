@@ -5,28 +5,25 @@ import java.awt.Graphics2D;
 
 public abstract class AbstractHandler {
 
-    public final int SQUARE_SIZE;
-    public final int HALF_SQUARE;
-    public final int WINDOW_WIDTH;
-    public final int WINDOW_HEIGHT;
-
-    public AbstractHandler(int SQUARE_SIZE, int WINDOW_WIDTH, int WINDOW_HEIGHT) {
-        this.SQUARE_SIZE = SQUARE_SIZE;
-        this.HALF_SQUARE = SQUARE_SIZE / 2;
-        this.WINDOW_WIDTH = WINDOW_WIDTH;
-        this.WINDOW_HEIGHT = WINDOW_HEIGHT;
-    }
-
     private AbstractHandler next;
 
-    public void handle(Graphics2D data, GameState state) {
-        this.handleData(data, state);
+    public void behave(GameState state) {
+        this.behaveData(state);
         if (next != null) {
-            this.next.handle(data, state);
+            this.next.behave(state);
         }
     }
 
-    abstract void handleData(Graphics2D data, GameState state);
+    public void draw(Graphics2D data, GameState state) {
+        this.drawData(data, state);
+        if (next != null) {
+            this.next.draw(data, state);
+        }
+    }
+
+    abstract void behaveData(GameState state);
+
+    abstract void drawData(Graphics2D data, GameState state);
 
     public void attachHandler(AbstractHandler h) {
         if (this.next != null) {
