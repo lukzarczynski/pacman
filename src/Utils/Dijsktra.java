@@ -2,7 +2,7 @@ package Utils;
 
 import Objects.Direction;
 import Objects.Field;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -55,7 +55,7 @@ public class Dijsktra {
 
     public static List<Direction> getDirections(Field start, Field finish) {
         if (start.equals(finish)) {
-            return new ArrayList<>();
+            return Arrays.asList(Direction.values());
         }
         List<Field> directions = getFields(start, finish);
         Map<Field, Direction> dirs = new HashMap<>();

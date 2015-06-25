@@ -15,36 +15,9 @@ public class Field
     private Field fieldLeft;
     private Field fieldRight;
     private Point point;
-    private boolean teleport;
+    private boolean teleport = false;
     private boolean cross = false;
-    private boolean ghostBase;
-
-    public Field(int posX, int posY) {
-        super(posX, posY);
-        this.teleport = false;
-    }
-
-    public Field(int posX, int posY, Point point) {
-        super(posX, posY);
-        this.teleport = false;
-        this.point = point;
-    }
-
-    public Field(int posX, int posY, boolean teleport) {
-        super(posX, posY);
-        this.teleport = teleport;
-    }
-
-    public Field(boolean ghostBase, int posX, int posY) {
-        super(posX, posY);
-        this.ghostBase = ghostBase;
-    }
-
-    public Field(int posX, int posY, Point point, boolean teleport) {
-        super(posX, posY);
-        this.teleport = teleport;
-        this.point = point;
-    }
+    private boolean ghostBase = false;
 
     public Field getFieldUp() {
         return fieldUp;
@@ -106,9 +79,12 @@ public class Field
         this.ghostBase = ghostBase;
     }
 
-    public void setFieldCoords(int halfSquareSize, int squareSize) {
-        setX((getColumn() * squareSize) + halfSquareSize);
-        setY((getRow() * squareSize) + halfSquareSize);
+    public void setTeleport(boolean teleport) {
+        this.teleport = teleport;
+    }
+
+    public boolean hasPoint() {
+        return point != null;
     }
 
     public List<Field> getFields() {
@@ -143,6 +119,57 @@ public class Field
         } else {
             return Direction.NONE;
         }
+    }
+
+    public boolean isDirectionValid(Direction dir) {
+        if (dir == null) {
+            return false;
+        }
+        switch (dir) {
+            case DOWN:
+                if (getFieldDown() != null) {
+                    return true;
+                }
+                break;
+            case UP:
+                if (getFieldUp() != null) {
+                    return true;
+                }
+                break;
+            case LEFT:
+                if (getFieldLeft() != null) {
+                    return true;
+                }
+                break;
+            case RIGHT:
+                if (getFieldRight() != null) {
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
+    public Field getFieldByDirection(Direction dir) {
+        if (dir == null) {
+            return null;
+        }
+        switch (dir) {
+            case DOWN:
+                return getFieldDown();
+            case UP:
+                return getFieldUp();
+            case LEFT:
+                return getFieldLeft();
+            case RIGHT:
+                return getFieldRight();
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return getColumn() + "|" + getRow() + "|" + teleport + "|" + cross + "|" + ghostBase;
     }
 
 }

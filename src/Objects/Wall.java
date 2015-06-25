@@ -4,7 +4,7 @@ package Objects;
  *
  * @author lukasz
  */
-public class Wall extends GameObject {
+public class Wall extends GameObject implements Cloneable {
 
     private final WallType type;
 
@@ -16,5 +16,5 @@ public class Wall extends GameObject {
     public WallType getType() {
         return type;
     }
-    
+
 }

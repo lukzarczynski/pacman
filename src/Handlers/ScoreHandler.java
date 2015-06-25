@@ -27,6 +27,10 @@ public class ScoreHandler
 
         data.drawString("FPS", x, y + 100);
         data.drawString(state.getFps() + "", x, y + 120);
+        
+        data.drawString("lives", x, y + 150);
+        data.drawString(state.getLives() + "", x, y + 170);
+
     }
 
     @Override

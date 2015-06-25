@@ -8,36 +8,11 @@ import java.awt.Color;
  */
 public class Ghost extends MovingGameObject {
 
-    private final GhostType type;
-    private final Color color;
+    private GhostType type;
+    private Color color;
     private int state = 4;
-    private final double aggression;
-
-    public Ghost(GhostType type, int posX, int posY, Field field) {
-        super(posX, posY, field);
-        this.type = type;
-        switch (type) {
-            case BLUE:
-                this.aggression = 0.6;
-                this.color = Color.BLUE;
-                break;
-            case PINK:
-                this.aggression = 0.5;
-                this.color = Color.PINK;
-                break;
-            case RED:
-                this.aggression = 0.8;
-                this.color = Color.RED;
-                break;
-            case YELLOW:
-                this.aggression = 0.7;
-                this.color = Color.YELLOW;
-                break;
-            default:
-                this.aggression = 0;
-                this.color = null;
-        }
-    }
+    private int counter = 0;
+    private double aggression;
 
     public GhostType getType() {
         return type;
@@ -55,16 +30,45 @@ public class Ghost extends MovingGameObject {
         this.state = state;
     }
 
+    public void setType(GhostType type) {
+        this.type = type;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public void setAggression(double aggression) {
+        this.aggression = aggression;
+    }
+
     public void nextState() {
         if (getState() == 4) {
             setState(3);
         } else {
             setState(4);
         }
+        counter = 1;
+    }
+
+    public void move(int h, int v) {
+        this.counter++;
+        if (counter % 8 == 0) {
+            nextState();
+        }
+        if ((isInExtraMode() && counter % 2 == 0) || !isInExtraMode()) {
+            setY(getY() + (v * getSpeed()));
+            setX(getX() + (h * getSpeed()));
+        }
     }
 
     public double getAggression() {
         return aggression;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString().concat("|").concat(this.color.toString());
     }
 
 }

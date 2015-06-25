@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="1">
+        <file>
+            <url>test/Game/GameStateTest.java</url>
+            <bookmark id="1">
+                <name/>
+                <line>25</line>
+                <key/>
+            </bookmark>
+        </file>
+    </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
         <group name="nettle"/>
+        <group>
+            <file>file:/home/lukasz/NetBeansProjects/pacman/Pacman/src/AI/AITask.java</file>
+            <file>file:/home/lukasz/NetBeansProjects/pacman/Pacman/src/Game/GameInitializer.java</file>
+            <file>file:/home/lukasz/NetBeansProjects/pacman/Pacman/src/AI/MCTS.java</file>
+            <file>file:/home/lukasz/NetBeansProjects/pacman/Pacman/src/Game/GameStateCloner.java</file>
+        </group>
     </open-files>
 </project-private>

@@ -44,7 +44,6 @@ public class MapHandler
         arcsToDraw.stream().forEach((arc) -> {
             data.drawArc(arc.getX1(), arc.getY1(), arc.getX2(), arc.getY2(), arc.getStartAngle(), arc.getArcAngle());
         });
-
     }
 
     private void initMap(GameState state, int squareSize) {

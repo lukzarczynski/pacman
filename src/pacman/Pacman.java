@@ -1,6 +1,7 @@
 package pacman;
 
 import Game.GameCore;
+import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -8,8 +9,8 @@ import Game.GameCore;
  */
 public class Pacman {
 
-    public static void main(String[] args) throws InterruptedException {
-        GameCore core = new GameCore(1000,800);
+    public static void main(String[] args) throws InterruptedException, CloneNotSupportedException, ExecutionException {
+        GameCore core = new GameCore();
         core.init();
         core.mainThreadLoop();
     }

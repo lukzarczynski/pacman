@@ -1,18 +1,15 @@
 package Objects;
 
+import java.util.Objects;
+
 /**
  *
  * @author lukasz
  */
 public class Point extends GameObject {
 
-    private final PointType type;
+    private PointType type;
     private boolean eaten = false;
-
-    public Point(int posX, int posY, PointType type) {
-        super(posX, posY);
-        this.type = type;
-    }
 
     public PointType getType() {
         return type;
@@ -25,6 +22,13 @@ public class Point extends GameObject {
     public void setEaten(boolean eaten) {
         this.eaten = eaten;
     }
-    
+
+    public Point clonePoint() {
+        return this;
+    }
+
+    public void setType(PointType type) {
+        this.type = type;
+    }
 
 }

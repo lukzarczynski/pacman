@@ -1,15 +1,17 @@
 package Game;
 
+import AI.AITask;
 import Handlers.GhostAIHandler;
 import Handlers.AbstractHandler;
+import Handlers.GameHandler;
 import Handlers.GhostHandler;
-import Handlers.InteractionHandler;
+import Handlers.GhostInteractionHandler;
 import Handlers.MapHandler;
 import Handlers.PlayerHandler;
+import Handlers.PlayerInteractionHandler;
 import Handlers.PointHandler;
 import Handlers.ScoreHandler;
 import Objects.Direction;
-import Objects.MapStatic;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Frame;
@@ -21,7 +23,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import static java.lang.System.exit;
 import java.util.Date;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -31,35 +33,26 @@ public class GameCore
         extends Canvas
         implements KeyListener {
 
-    private static final Logger LOG = Logger.getLogger(GameCore.class.getName());
-
     private boolean runMainThread;
-    private Frame frame;
-    private final int WINDOW_WIDTH;
-    private final int WINDOW_HEIGHT;
-    private final int SQUARE_SIZE;
+    private final Frame frame = new Frame("Pacman");
+    public static final int WINDOW_WIDTH = 800;
+    public static final int WINDOW_HEIGHT = 600;
+    public static final int SQUARE_SIZE = 18;
+    public static final int HALF_SQUARE = 9;
     private BufferStrategy bufferStrategy;
     private AbstractHandler handler;
-    private GameState state;
-    private final double fps = 30;
+    private final GameState state = new GameState();
+    public static final double fps = 30;
     private final long frameDelay = (long) (1000 / fps);
-
-    public GameCore(int width, int height) {
-        this.WINDOW_WIDTH = width;
-        this.WINDOW_HEIGHT = height;
-        int squares = Math.max(MapStatic.map.length, MapStatic.map[0].length);
-        this.SQUARE_SIZE = Math.min((width - 40) / squares, (height - 40) / squares);
-    }
+    private final boolean AI = true;
 
     public void init() {
-        frame = new Frame("Pacman");
         frame.setLayout(null);
         setBounds(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         frame.add(this);
         frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         frame.setResizable(false);
         frame.setVisible(true);
-
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -72,19 +65,22 @@ public class GameCore
         createBufferStrategy(2);
         bufferStrategy = getBufferStrategy();
         runMainThread = true;
-        this.state = new GameState(SQUARE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
-        state.initGameState();
+
+        GameInitializer.initialazeGameState(state);
         this.handler = new MapHandler(state);
-        this.handler.attachHandler(new PointHandler(state));
-        this.handler.attachHandler(new InteractionHandler());
-        this.handler.attachHandler(new PlayerHandler());
-        this.handler.attachHandler(new GhostHandler(state));
+        this.handler.attachHandler(new PointHandler());
         this.handler.attachHandler(new ScoreHandler());
+        this.handler.attachHandler(new GameHandler());
+        this.handler.attachHandler(new PlayerInteractionHandler());
+        this.handler.attachHandler(new GhostInteractionHandler());
         this.handler.attachHandler(new GhostAIHandler());
+        this.handler.attachHandler(new PlayerHandler());
+        this.handler.attachHandler(new GhostHandler());
 
     }
 
-    public void mainThreadLoop() throws InterruptedException {
+    public void mainThreadLoop() throws InterruptedException, CloneNotSupportedException, ExecutionException {
+        AITask.getInstance().withPlayer(state.getPlayer()).withHandler(handler);
         while (runMainThread) {
             Long start = new Date().getTime();
             Graphics2D g = getGraphicsContext();
@@ -95,57 +91,23 @@ public class GameCore
 
             handler.behave(state);
             handler.draw(g, state);
+
             g.dispose();
             bufferStrategy.show();
             Long time = new Date().getTime() - start;
             state.setFps(time);
-//            LOG.log(Level.INFO, "+ {0} ms", time);
-            if (frameDelay > time) {
-                Thread.sleep(frameDelay - time);
+            if (AI) {
+                AITask.getInstance().withState(state).withTimeout(frameDelay - time - 2).simulate();
+            } else {
+                if (frameDelay - time > 0) {
+                    Thread.sleep(frameDelay - time);
+                }
             }
-//            LOG.log(Level.INFO, "- {0} ms", (new Date().getTime() - start));
-
         }
     }
 
     public Graphics2D getGraphicsContext() {
         return (Graphics2D) bufferStrategy.getDrawGraphics();
-    }
-
-    public boolean isRunMainThread() {
-        return runMainThread;
-    }
-
-    public void setRunMainThread(boolean runMainThread) {
-        this.runMainThread = runMainThread;
-    }
-
-    public Frame getFrame() {
-        return frame;
-    }
-
-    public void setFrame(Frame frame) {
-        this.frame = frame;
-    }
-
-    public int getWIDTH() {
-        return WINDOW_WIDTH;
-    }
-
-    public int getHEIGHT() {
-        return WINDOW_HEIGHT;
-    }
-
-    public int getWINDOW_WIDTH() {
-        return WINDOW_WIDTH;
-    }
-
-    public int getWINDOW_HEIGHT() {
-        return WINDOW_HEIGHT;
-    }
-
-    public int getSQUARE_SIZE() {
-        return SQUARE_SIZE;
     }
 
     @Override
@@ -179,4 +141,53 @@ public class GameCore
     @Override
     public void keyReleased(KeyEvent e) {
     }
+
+    public boolean isRunMainThread() {
+        return runMainThread;
+    }
+
+    public void setRunMainThread(boolean runMainThread) {
+        this.runMainThread = runMainThread;
+    }
+
+    public AbstractHandler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(AbstractHandler handler) {
+        this.handler = handler;
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public Frame getFrame() {
+        return frame;
+    }
+
+    public static int getWINDOW_WIDTH() {
+        return WINDOW_WIDTH;
+    }
+
+    public static int getWINDOW_HEIGHT() {
+        return WINDOW_HEIGHT;
+    }
+
+    public static int getSQUARE_SIZE() {
+        return SQUARE_SIZE;
+    }
+
+    public static int getHALF_SQUARE() {
+        return HALF_SQUARE;
+    }
+
+    public static double getFps() {
+        return fps;
+    }
+
+    public boolean isAI() {
+        return AI;
+    }
+
 }
