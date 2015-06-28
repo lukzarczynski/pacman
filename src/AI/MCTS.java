@@ -1,9 +1,10 @@
 package AI;
 
+import Game.GameInitializer;
 import Game.GameState;
+import Game.GameStateCloner;
 import Handlers.AbstractHandler;
 import Objects.Direction;
-import Objects.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,21 +20,25 @@ public class MCTS {
 
     private static final Logger LOG = Logger.getLogger(MCTS.class.getName());
 
-    private final int nodeExpansionThreshold = 5;
-    private final int maximumSimulationLength = 20;
-    private final int maximumDepht = 8;
+    private final int nodeExpansionThreshold = 10;
+    private final int maximumSimulationLength = 100;
+    private final int maximumDepht = 4;
     private final int deathPenalty = 1000;
     private final int levelAward = 1000;
-    private GameState game = null;
-    private StateTreeNode root;
+    private final static GameState game = new GameState();
+    private final static GameState tempState = new GameState();
+    private StateTreeNode root = new StateTreeNode();
     private AbstractHandler handler;
 
-    public MCTS() {
-        this.root = new StateTreeNode();
+    static {
+        GameInitializer.initialazeGameState(game);
+        GameInitializer.initialazeGameState(tempState);
     }
 
-    public void updateMCTS(GameState newState) {
-        if (this.game != null && newState.convertToString().equals(this.game.convertToString())) {
+    public void updateState(GameState newState) {
+        if (newState.convertToString().equals(MCTS.game.convertToString())
+                || (newState.getPlayer().getLastCrossColumn() == MCTS.game.getPlayer().getLastCrossColumn()
+                && newState.getPlayer().getLastCrossRow() == MCTS.game.getPlayer().getLastCrossRow())) {
             return;
         }
         root = root.getState(newState);
@@ -41,32 +46,31 @@ public class MCTS {
             root = new StateTreeNode();
         }
         root.setParent(null);
-        this.game = newState;
+        GameStateCloner.cloneState(this.game, newState);
     }
 
     public void runSimulation() {
         List<StateTreeNode> visitedNodes = new ArrayList<>();
 
-        int lives = game.getLives();
-
         StateTreeNode node = root;
+        GameStateCloner.cloneState(tempState, game);
+        int lives = tempState.getLives();
         int depth = 1;
 
         while (!node.isLeaf() && depth++ < maximumDepht) {
             Direction d = selectDirection(node);
             changePlayerDirection(d);
             advanceGameToNextNode();
-            node = node.getState(game);
+            node = node.getState(tempState);
             node.incrementTimesVisited();
             visitedNodes.add(node);
         }
-        LOG.info("end loop");
 
         if (node == root || node.getTimesVisited() >= nodeExpansionThreshold) {
-            node.expand(game);
-            movePlayerRandomly();
+            node.expand(tempState);
+            tempState.getPlayer().selectRandomMove();
             advanceGameToNextNode();
-            node = node.getState(game);
+            node = node.getState(tempState);
             node.incrementTimesVisited();
             visitedNodes.add(node);
         }
@@ -74,25 +78,23 @@ public class MCTS {
     }
 
     private void changePlayerDirection(Direction dir) {
-        game.getPlayer().setNextDirection(dir);
-    }
-
-    private Direction movePlayerRandomly() {
-        return game.getPlayer().selectRandomMove();
+        tempState.getPlayer().setNextDirection(dir);
     }
 
     private void advanceGameToNextNode() {
-        handler.behave(game);
-        while (!(game.isOnMiddle(game.getPlayer()) || game.getPlayer().isAtCross())) {
-            handler.behave(game);
+        handler.behave(tempState);
+        while (!(tempState.isOnMiddle(tempState.getPlayer()) && tempState.getPlayer().isAtCross())) {
+            handler.behave(tempState);
         }
+        tempState.getPlayer().setColumn(tempState.getPlayer().getField().getColumn());
+        tempState.getPlayer().setRow(tempState.getPlayer().getField().getRow());
     }
 
     private int runSimulation(List<StateTreeNode> visitedNodes, int lives) {
 
         int score = 0;
 
-        if (game.getLives() < lives) {
+        if (tempState.getLives() < lives) {
             score -= deathPenalty;
         }
 
@@ -106,42 +108,42 @@ public class MCTS {
     }
 
     private int rollout() {
-        int level = game.getLevel();
-        int lives = game.getLives();
-        int score = game.getScore();
-        long bigPoints = game.countBigPoints();
-        long pointsEaten = game.countPointsEaten();
-        int ghostsEaten = game.getGhostsEaten();
+        int level = tempState.getLevel();
+        int lives = tempState.getLives();
+        int score = tempState.getScore();
+        long bigPoints = tempState.countBigPoints();
+        long pointsEaten = tempState.countPointsEaten();
+        int ghostsEaten = tempState.getGhostsEaten();
         String field = "";
-        double dist = ScoreEvaluator.distanceToClosestGhost(game);
+        double dist = ScoreEvaluator.distanceToClosestGhost(tempState);
         int i = 0;
-        int x = 0;
         while (i++ < maximumSimulationLength
-                && game.getLives() > 0
-                && game.getLevel() == level) {
-            handler.behave(game);
-            if (game.isOnMiddle(game.getPlayer())) {
-                game.getPlayer().selectRandomMove();
-                if (!game.getPlayer().getField().toString().equals(field)) {
-                    field = game.getPlayer().getField().toString();
-                    score += ScoreEvaluator.evaluateScore(game, level, lives, score, bigPoints, pointsEaten, dist, ghostsEaten);
-                    level = game.getLevel();
-                    lives = game.getLives();
-                    score = game.getScore();
-                    bigPoints = game.countBigPoints();
-                    pointsEaten = game.countPointsEaten();
-                    dist = ScoreEvaluator.distanceToClosestGhost(game);
+                && tempState.getLives() > 0
+                && tempState.getLevel() == level) {
+            handler.behave(tempState);
+            tempState.getPlayer().setColumn(tempState.getPlayer().getField().getColumn());
+            tempState.getPlayer().setRow(tempState.getPlayer().getField().getRow());
+            if (tempState.isOnMiddle(tempState.getPlayer())) {
+                tempState.getPlayer().selectRandomMove();
+                if (!tempState.getPlayer().getField().toString().equals(field.toString())) {
+                    field = tempState.getPlayer().getField().toString();
+                    score += ScoreEvaluator.evaluateScore(tempState, level, lives, score, bigPoints, pointsEaten, dist, ghostsEaten);
+                    level = tempState.getLevel();
+                    lives = tempState.getLives();
+                    score = tempState.getScore();
+                    bigPoints = tempState.countBigPoints();
+                    pointsEaten = tempState.countPointsEaten();
+                    dist = ScoreEvaluator.distanceToClosestGhost(tempState);
                 }
             }
         }
 
-        int scoreGained = (game.getScore() - score) * 10;
-        LOG.info("gained score: " + scoreGained);
+        int scoreGained = (tempState.getScore() - score);
 
-        if (game.getLives() < lives) {
+        if (tempState.getLives() < lives) {
             scoreGained -= deathPenalty;
         }
-        if (game.getLevel() > level) {
+        if (tempState.getLevel() > level) {
             scoreGained += levelAward;
         }
 
@@ -168,10 +170,6 @@ public class MCTS {
 
     public GameState getGame() {
         return game;
-    }
-
-    public void setGame(GameState game) {
-        this.game = game;
     }
 
     public StateTreeNode getRoot() {

@@ -1,6 +1,7 @@
 package Handlers;
 
 import Game.GameState;
+import Objects.Direction;
 import java.awt.Graphics2D;
 
 /**
@@ -27,10 +28,16 @@ public class ScoreHandler
 
         data.drawString("FPS", x, y + 100);
         data.drawString(state.getFps() + "", x, y + 120);
-        
+
         data.drawString("lives", x, y + 150);
         data.drawString(state.getLives() + "", x, y + 170);
 
+        int i = 1;
+        for (Direction d : state.getStats().keySet()) {
+            data.drawString("direction: " + d.name(), x, y + 150 + (i * 50));
+            data.drawString(state.getStats().get(d).getCalculatedValue() + "", x, y + 170 + (i * 50));
+            i++;
+        }
     }
 
     @Override

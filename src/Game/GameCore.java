@@ -42,7 +42,7 @@ public class GameCore
     private BufferStrategy bufferStrategy;
     private AbstractHandler handler;
     private final GameState state = new GameState();
-    public static final double fps = 30;
+    public static final double fps = 25;
     private final long frameDelay = (long) (1000 / fps);
     private final boolean AI = true;
 

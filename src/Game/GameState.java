@@ -1,5 +1,7 @@
 package Game;
 
+import AI.NodeStats;
+import Objects.Direction;
 import Objects.Field;
 import Objects.Ghost;
 import Objects.GhostType;
@@ -9,7 +11,9 @@ import Objects.Point;
 import Objects.PointType;
 import Objects.Wall;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -36,6 +40,7 @@ public class GameState {
     private int ghostsEaten = 0;
     private int lives = 3;
     private long fps = 0;
+    private Map<Direction, NodeStats> stats = new HashMap<>();
 
     public void initGameState() {
         GameInitializer.initialazeGameState(this);
@@ -228,6 +233,14 @@ public class GameState {
 
     void incrementLevel() {
         this.level++;
+    }
+
+    public Map<Direction, NodeStats> getStats() {
+        return stats;
+    }
+
+    public void setStats(Map<Direction, NodeStats> stats) {
+        this.stats = stats;
     }
 
 }

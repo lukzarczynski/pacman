@@ -1,6 +1,7 @@
 package Objects;
 
 import Utils.Calculator;
+import java.util.logging.Logger;
 
 /**
  *
@@ -8,6 +9,8 @@ import Utils.Calculator;
  */
 public class MovingGameObject
         extends GameObject {
+
+    private static final Logger LOG = Logger.getLogger(MovingGameObject.class.getName());
 
     private Direction direction = Direction.NONE;
     private Direction nextDirection = Direction.LEFT;
@@ -53,15 +56,9 @@ public class MovingGameObject
                 && this.getField().isTeleport())
                 && Calculator.distance(this, nextField) <= distance) {
             setField(nextField);
+            setColumn(nextField.getColumn());
+            setRow(nextField.getRow());
         }
-    }
-
-    public void resetToBase(Field field) {
-        setInExtraMode(false);
-        setDirection(Direction.LEFT);
-        setField(field);
-        setX(0);
-        setEaten(false);
     }
 
     public final void setField(Field field) {

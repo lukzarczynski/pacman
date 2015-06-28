@@ -35,8 +35,8 @@ public class PlayerHandler
             }
         }
 
-//        data.drawRect(player.getField().getColumn() * state.getSQUARE_SIZE(),
-//                player.getField().getRow() * state.getSQUARE_SIZE(), state.getSQUARE_SIZE(), state.getSQUARE_SIZE());
+        data.drawRect(player.getField().getColumn() * state.getSQUARE_SIZE(),
+                player.getField().getRow() * state.getSQUARE_SIZE(), state.getSQUARE_SIZE(), state.getSQUARE_SIZE());
         data.fillArc(
                 (int) player.getX() - state.getHALF_SQUARE(),
                 (int) player.getY() - state.getHALF_SQUARE(),
@@ -69,7 +69,7 @@ public class PlayerHandler
                     player.setFieldIfNear(player.getField().getFieldRight(), state.getHALF_SQUARE());
                     break;
             }
-
+            player.isAtCross();
         }
     }
 

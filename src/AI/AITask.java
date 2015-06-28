@@ -19,11 +19,13 @@ public class AITask {
 
     private static final AITask instance = new AITask();
     private static final GameState state = new GameState();
+    private static GameState originalState;
     private Player player;
     private Long timeout;
     private Long timeStarted;
     private final MCTS simulator = new MCTS();
-    static{
+
+    static {
         GameInitializer.initialazeGameState(state);
     }
 
@@ -32,7 +34,7 @@ public class AITask {
     }
 
     public void simulate() {
-        simulator.updateMCTS(state);
+        simulator.updateState(state);
         while (new Date().getTime() < (timeStarted + timeout)) {
             simulator.runSimulation();
         }
@@ -40,10 +42,12 @@ public class AITask {
         if (bd != null && !bd.equals(Direction.NONE)) {
             player.setNextDirection(bd);
         }
+        originalState.setStats(simulator.getRoot().getStatistics());
 
     }
 
     public AITask withState(GameState st) {
+        originalState = st;
         GameStateCloner.cloneState(state, st);
         return instance;
     }

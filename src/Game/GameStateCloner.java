@@ -27,6 +27,8 @@ public class GameStateCloner {
         });
 
         updateObject(clonedState.getPlayer(), staticState.getPlayer(), clonedState);
+        clonedState.getPlayer().setLastCrossColumn(staticState.getPlayer().getLastCrossColumn());
+        clonedState.getPlayer().setLastCrossRow(staticState.getPlayer().getLastCrossRow());
 
         clonedState.setExtraMode(staticState.isExtraMode());
         clonedState.setExtraModeCounter(staticState.getExtraModeCounter());

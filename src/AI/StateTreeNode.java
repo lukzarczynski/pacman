@@ -5,12 +5,15 @@ import Objects.Direction;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  *
  * @author lukasz
  */
 public class StateTreeNode {
+
+    private static final Logger LOG = Logger.getLogger(StateTreeNode.class.getName());
 
     private StateTreeNode parent;
     private final Map<String, StateTreeNode> states = new HashMap<>();
@@ -71,6 +74,10 @@ public class StateTreeNode {
 
     public int getTimesVisited() {
         return this.parent.statistics.get(directionToGetHere).getTimesVisited();
+    }
+
+    public double getEstimatedValue() {
+        return this.parent.statistics.get(directionToGetHere).getEstimatedValue();
     }
 
     public void expand(GameState state) {
